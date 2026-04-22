@@ -35,28 +35,38 @@ cp .env.example " .env"
 ```
 
 ### 2. Firmware ESP32 (PlatformIO)
-Để đảm bảo bảo mật, mã nguồn sử dụng các macro thay cho dữ liệu nhạy cảm. Sử dụng các script sau cho quy trình build:
+Yêu cầu: Đã cài đặt [PlatformIO CLI](https://platformio.org/install/cli).
+Thực hiện quy trình build bảo mật:
 ```bash
-# Giải mã các bí mật cho trình biên dịch
+# 1. Giải mã các bí mật cho trình biên dịch
 python3 scripts/unredact_code.py
 
-# Build và Nạp code
+# 2. Build và Nạp code (OTA mặc định)
 pio run -t upload
 
-# Mã hóa lại các bí mật để commit an toàn
+# 3. Mã hóa lại các bí mật sau khi nạp xong
 python3 scripts/redact_code.py
 ```
 
 ### 3. Ứng dụng Flutter
+Yêu cầu: [Flutter SDK](https://docs.flutter.dev/get-started/install).
 ```bash
 cd flutter_app
 flutter pub get
 flutter run -d <id_thiet_bi>
 ```
 
-### 4. Python Server
+### 4. Python Server (Cập nhật giá & Điều khiển PC)
+Yêu cầu các thư viện: `flask`, `requests`, `beautifulsoup4`, `easyocr`, `pillow`, `numpy`.
 ```bash
+# Cài đặt phụ thuộc
+pip install flask requests beautifulsoup4 easyocr pillow numpy
+
+# Chạy server cục bộ
 python3 scripts/home_server.py
+
+# (Tùy chọn) Chạy script cập nhật giá điện tự động
+python3 scripts/fetch_price_v2.py
 ```
 
 ## 🛡️ Bảo mật
