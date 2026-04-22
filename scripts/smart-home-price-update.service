@@ -1,0 +1,11 @@
+[Unit]
+Description=Run AI Electricity Price Update
+
+[Service]
+Type=oneshot
+User=meepaw
+WorkingDirectory=/home/meepaw/Study/IoT/final/scripts/
+ExecStart=/usr/bin/python3 /home/meepaw/Study/IoT/final/scripts/fetch_price_v2.py
+
+[Install]
+WantedBy=multi-user.target

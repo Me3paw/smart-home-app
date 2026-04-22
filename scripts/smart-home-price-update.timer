@@ -1,0 +1,9 @@
+[Unit]
+Description=Run AI Electricity Price Update every 30 days
+
+[Timer]
+OnCalendar=monthly
+Persistent=true
+
+[Install]
+WantedBy=timers.target

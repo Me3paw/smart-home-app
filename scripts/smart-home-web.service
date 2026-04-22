@@ -1,0 +1,13 @@
+[Unit]
+Description=Smart Home Web App Service
+After=network.target
+
+[Service]
+Type=simple
+User=meepaw
+WorkingDirectory=/home/meepaw/Study/IoT/final
+ExecStart=/usr/bin/python3 /home/meepaw/Study/IoT/final/scripts/web_server.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

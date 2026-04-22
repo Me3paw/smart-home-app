@@ -1,0 +1,13 @@
+[Unit]
+Description=Smart Home Merged Server (Price, CSV Upload, Shutdown)
+After=network.target
+
+[Service]
+User=meepaw
+WorkingDirectory=/home/meepaw/Study/IoT/final/scripts/
+ExecStart=/usr/bin/python /home/meepaw/Study/IoT/final/scripts/home_server.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
