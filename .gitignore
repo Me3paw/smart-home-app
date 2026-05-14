@@ -2,11 +2,11 @@
 .env
 \ .env
 
-# Documentation (Ignore all .md EXCEPT README.md)
+# Documentation
 *.md
-!README.md
 **/*.md
-!**/README.md
+*.[mM][dD]
+**/*.[mM][dD]
 
 # Build & System
 .pio/
