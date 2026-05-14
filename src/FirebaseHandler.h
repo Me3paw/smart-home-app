@@ -55,6 +55,11 @@ private:
     bool pzemStreamActive = false;
     unsigned long lastPzemSync = 0;
 
+    static constexpr unsigned long FIREBASE_NETWORK_RECONNECT_MS = 10000UL;
+    static constexpr unsigned long FIREBASE_SOCKET_TIMEOUT_MS = 10000UL;
+    static constexpr unsigned long FIREBASE_SERVER_RESPONSE_TIMEOUT_MS = 10000UL;
+
+    bool canUseFirebase() const;
     void handleCommands();
 };
 

@@ -44,6 +44,12 @@ private:
     unsigned long lastDataLog = 0;
     unsigned long lastWakeAttempt = 0;
 
+    static constexpr unsigned long WAKE_RETRY_INTERVAL_MS = 300000UL;
+    static constexpr unsigned long POST_AFTER_WAKE_DELAY_MS = 120000UL;
+    static constexpr unsigned long PUSH_RETRY_INTERVAL_MS = 1800000UL;
+    static constexpr const char* PRICE_URL = "http://PING_TARGET_PC_PLACEHOLDER:5000/price";
+    static constexpr const char* UPLOAD_URL = "http://PING_TARGET_PC_PLACEHOLDER:5000/upload_csv";
+
     Preferences preferences;
     PCController* pcController = nullptr;
 

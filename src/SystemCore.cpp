@@ -78,6 +78,16 @@ void SystemCore::pingTask(void* pvParameters) {
 }
 
 void SystemCore::update() {
+    if (WiFi.status() != WL_CONNECTED) {
+        unsigned long now = millis();
+        if (now - lastWiFiReconnectAttempt >= WIFI_RECONNECT_INTERVAL_MS) {
+            Serial.println("[System] WiFi disconnected. Reconnecting...");
+            WiFi.reconnect();
+            lastWiFiReconnectAttempt = now;
+        }
+        return;
+    }
+
     ArduinoOTA.handle();
     server.handleClient();
 }
@@ -101,11 +111,23 @@ void SystemCore::setupWiFi() {
         }
     }
 
+    WiFi.mode(WIFI_STA);
+    WiFi.persistent(false);
+    WiFi.setAutoReconnect(true);
     WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
+
+    unsigned long startAttempt = millis();
+    while (WiFi.status() != WL_CONNECTED && millis() - startAttempt < WIFI_CONNECT_TIMEOUT_MS) {
         delay(500);
         Serial.print(".");
     }
+
+    if (WiFi.status() != WL_CONNECTED) {
+        Serial.println("\nWiFi connect timed out; continuing with background reconnect");
+        lastWiFiReconnectAttempt = millis();
+        return;
+    }
+
     Serial.println("\nWiFi connected");
     Serial.print("IP Address: ");
     Serial.println(WiFi.localIP());

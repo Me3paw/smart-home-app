@@ -5,7 +5,7 @@
 // ================= CẤU HÌNH =================
 const char* ssid = "WIFI_SSID_PLACEHOLDER"; 
 const char* password = "WIFI_PASS_PLACEHOLDER";
-const char* mqtt_server = "192.168.1.27"; 
+const char* mqtt_server = "PING_TARGET_PC_PLACEHOLDER";
 
 // ================= PINOUT (Hot-glued) =================
 // TRÊN S3, 9 VÀ 10 THƯỜNG LÀ CỔNG SERIAL MẶC ĐỊNH

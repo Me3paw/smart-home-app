@@ -27,5 +27,5 @@
 
 ## 5. Persistence
 - ESP32: Relays, AC presets, macros, energy logs.
-- PC: `http://192.168.1.27:5000/` for pricing/shutdown.
-- Status: Ping PC at `192.168.1.27`.
+- PC: `http://PING_TARGET_PC_PLACEHOLDER:5000/` for pricing/shutdown.
+- Status: Ping PC at `PING_TARGET_PC_PLACEHOLDER`.

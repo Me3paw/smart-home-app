@@ -17,7 +17,7 @@ const char* ssid = "WIFI_SSID_PLACEHOLDER";
 const char* password = "WIFI_PASS_PLACEHOLDER";
 
 // PC MQTT Broker (for remote logging)
-const char* mqtt_server = "MQTT_SERVER_PLACEHOLDER";
+const char* mqtt_server = "PING_TARGET_PC_PLACEHOLDER";
 
 // Firebase Credentials
 const char* firebase_apiKey = "FIREBASE_API_KEY_PLACEHOLDER"; 
@@ -36,7 +36,7 @@ SystemCore systemCore(ssid, password);
 RelayController relayController;
 ClimateController climateController(21); // IR_SEND_PIN
 PZEMManager pzemManager(Serial1, 9, 10); // RX: 9, TX: 10
-PCController pcController("PC_MAC_PLACEHOLDER", "MQTT_SERVER_PLACEHOLDER", "PC_SHUTDOWN_URL_PLACEHOLDER");
+PCController pcController("PC_MAC_PLACEHOLDER", "PING_TARGET_PC_PLACEHOLDER", "PC_SHUTDOWN_URL_PLACEHOLDER");
 MacroEngine macroEngine;
 EnergyAnalytics energyAnalytics;
 HealthMonitor healthMonitor(13); // DHT22 on GPIO 13
@@ -80,7 +80,7 @@ void setup() {
 
     // 2. Initialize WiFi
     systemCore.setStaticIP(local_IP, gateway, subnet, dns);
-    systemCore.setPingTargets(IPAddress(PING_TARGET_PC), IPAddress(PING_TARGET_PHONE));
+    systemCore.setPingTargets(IPAddress(PING_TARGET_PC_PLACEHOLDER), IPAddress(PING_TARGET_PHONE_PLACEHOLDER));
     systemCore.begin(); 
     randomSeed(analogRead(0)); // Seed for animations/blinking
 
@@ -100,8 +100,12 @@ void setup() {
     logToMqtt("Syncing Time...");
     configTime(7 * 3600, 0, "pool.ntp.org", "time.google.com");
     time_t now = time(nullptr);
-    while (now < 8 * 3600 * 2) { delay(500); now = time(nullptr); }
-    logToMqtt("Time synced!");
+    unsigned long startTimeSync = millis();
+    while (now < 8 * 3600 * 2 && millis() - startTimeSync < 30000UL) {
+        delay(500);
+        now = time(nullptr);
+    }
+    logToMqtt(now >= 8 * 3600 * 2 ? "Time synced!" : "Time sync timed out; Firebase will retry");
 
     // 5. Initialize Firebase with Auth
     firebaseHandler.setAuth(user_email, user_password);

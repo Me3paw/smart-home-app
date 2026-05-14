@@ -13,20 +13,22 @@ int EnergyAnalytics::update(float totalEnergy) {
     
     // Monthly Data Push Logic
     if (pushPending) {
+        bool canRetryPush = (lastPushAttempt == 0 || now - lastPushAttempt >= PUSH_RETRY_INTERVAL_MS);
+
         if (pcController && pcController->isOnline()) {
-            pushMonthlyData();
+            if (canRetryPush) {
+                pushMonthlyData();
+            }
         } else if (pcController) {
-            if (lastWakeAttempt == 0 || (now - lastWakeAttempt > 300000)) { 
+            if (lastWakeAttempt == 0 || now - lastWakeAttempt >= WAKE_RETRY_INTERVAL_MS) {
                 Serial.println("[Energy] PC Offline for monthly push. Sending WOL");
                 pcController->wake();
                 lastWakeAttempt = now;
-            } else if (now - lastWakeAttempt > 120000) { 
+            } else if (now - lastWakeAttempt >= POST_AFTER_WAKE_DELAY_MS && canRetryPush) {
                 pushMonthlyData();
             }
-        } else {
-            if (now - lastPushAttempt > 1800000 || lastPushAttempt == 0) {
-                pushMonthlyData();
-            }
+        } else if (canRetryPush) {
+            pushMonthlyData();
         }
     }
 
@@ -106,7 +108,7 @@ void EnergyAnalytics::forceMonthRoll() {
 
 void EnergyAnalytics::fetchElectricityPrice() {
     HTTPClient http;
-    http.begin("http://PING_TARGET_PC:5000/price");
+    http.begin(PRICE_URL);
     http.setTimeout(5000);
     int httpCode = http.GET();
     if (httpCode == 200) {
@@ -132,8 +134,10 @@ void EnergyAnalytics::fetchElectricityPrice() {
     http.end();
 }
 void EnergyAnalytics::pushMonthlyData() {
+    lastPushAttempt = millis();
+
     HTTPClient http;
-    http.begin("http://PING_TARGET_PC:5000/upload_csv");
+    http.begin(UPLOAD_URL);
     http.setTimeout(15000); // PC might be slow to respond after just waking
     http.addHeader("Content-Type", "text/csv");
 

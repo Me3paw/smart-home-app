@@ -5,7 +5,7 @@ import re
 env_path = ' .env'
 
 # Base directories to search for code and config files
-search_dirs = ['src', 'scripts', 'flutter_app/lib', 'flutter_app/android', 'include', 'data', 'web', 'flutter_app/web']
+search_dirs = ['src', 'scripts', 'flutter_app/lib', 'flutter_app/android', 'include', 'data', 'web', 'flutter_app/web', 'sketch_apr15a']
 
 # Suffixes of files to redact
 extensions = ('.cpp', '.h', '.py', '.dart', '.json', '.xml', '.yaml', '.txt', '.ino', '.ini', '.md', '.html', '.js', '.css')
@@ -25,11 +25,16 @@ if os.path.exists(env_path):
                 if val and key and len(val) > 3: # Avoid redacting extremely short strings
                     placeholder = f"{key}_PLACEHOLDER"
                     mappings.append((val, placeholder))
+
+                    # Match URL forms with or without a trailing slash.
+                    if val.endswith('/'):
+                        mappings.append((val.rstrip('/'), placeholder))
                     
                     # IP specific variation for C++ IPAddress(192, 168, 1, 1)
                     if re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', val):
                         comma_val = val.replace('.', ', ')
                         mappings.append((comma_val, placeholder))
+                        mappings.append((val.replace('.', ','), placeholder))
 
 # Sort by length descending to handle nested matches (e.g. URL vs Domain)
 mappings.sort(key=lambda x: len(x[0]), reverse=True)
@@ -63,12 +68,12 @@ for s_dir in search_dirs:
         continue
     for root, dirs, files in os.walk(s_dir):
         for file in files:
-            if file.endswith(extensions):
+            if file.lower().endswith(extensions):
                 redact_file(os.path.join(root, file))
 
 # Special case: Also redact root files like platformio.ini
 for file in os.listdir('.'):
-    if file.endswith(extensions) and os.path.isfile(file):
+    if file.lower().endswith(extensions) and os.path.isfile(file):
         redact_file(file)
 
 print("Redaction complete.")

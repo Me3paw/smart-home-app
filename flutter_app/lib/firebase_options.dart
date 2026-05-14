@@ -50,12 +50,12 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAcU0U-ANwQ7OZSOdNSyEzV_r1RGgH-nfQ',
+    apiKey: 'FIREBASE_WEB_API_KEY_PLACEHOLDER',
     appId: '1:936257092081:web:d83f107b124378db1f6c50',
     messagingSenderId: '936257092081',
     projectId: 'iot-smart-home-c9840',
     authDomain: 'iot-smart-home-c9840.firebaseapp.com',
-    databaseURL: 'https://iot-smart-home-c9840-default-rtdb.asia-southeast1.firebasedatabase.app',
+    databaseURL: 'FIREBASE_DB_URL_PLACEHOLDER',
     storageBucket: 'iot-smart-home-c9840.firebasestorage.app',
     measurementId: 'G-X79G2HJLDK',
   );
@@ -65,7 +65,7 @@ class DefaultFirebaseOptions {
     appId: '1:936257092081:android:af2af4e2ef829d671f6c50',
     messagingSenderId: '936257092081',
     projectId: 'iot-smart-home-c9840',
-    databaseURL: 'https://iot-smart-home-c9840-default-rtdb.asia-southeast1.firebasedatabase.app',
+    databaseURL: 'FIREBASE_DB_URL_PLACEHOLDER',
     storageBucket: 'iot-smart-home-c9840.firebasestorage.app',
   );
 }

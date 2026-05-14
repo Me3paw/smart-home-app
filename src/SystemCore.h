@@ -30,6 +30,10 @@ private:
     IPAddress gateway;
     IPAddress subnet;
     IPAddress dns;
+    unsigned long lastWiFiReconnectAttempt = 0;
+
+    static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 20000UL;
+    static constexpr unsigned long WIFI_RECONNECT_INTERVAL_MS = 10000UL;
 
     // Ping targets and status
     IPAddress pcIP;

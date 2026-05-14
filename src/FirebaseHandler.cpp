@@ -6,6 +6,7 @@
 #include "EnergyAnalytics.h"
 #include "MacroEngine.h"
 #include "HealthMonitor.h"
+#include <WiFi.h>
 
 FirebaseHandler::FirebaseHandler(const char* apiKey, const char* databaseUrl)
     : apiKey(apiKey), databaseUrl(databaseUrl) {}
@@ -31,6 +32,9 @@ void FirebaseHandler::begin(RelayController& r, ClimateController& ac, PZEMManag
 
     config.api_key = apiKey;
     config.database_url = databaseUrl;
+    config.timeout.networkReconnect = FIREBASE_NETWORK_RECONNECT_MS;
+    config.timeout.socketConnection = FIREBASE_SOCKET_TIMEOUT_MS;
+    config.timeout.serverResponse = FIREBASE_SERVER_RESPONSE_TIMEOUT_MS;
     
     // Maintain the 8192 buffer size as requested
     fbdo.setResponseSize(8192);
@@ -40,13 +44,17 @@ void FirebaseHandler::begin(RelayController& r, ClimateController& ac, PZEMManag
     auth.user.password = userPassword;
 
     Serial.println("Connecting to Firebase");
-    Firebase.reconnectWiFi(true);
+    Firebase.reconnectNetwork(true);
     Firebase.begin(&config, &auth);
     isReady = true;
 }
 
+bool FirebaseHandler::canUseFirebase() const {
+    return isReady && WiFi.status() == WL_CONNECTED && Firebase.ready();
+}
+
 void FirebaseHandler::update() {
-    if (!Firebase.ready() || !isReady) return;
+    if (!canUseFirebase()) return;
 
     // Initial push to create nodes in Firebase
     if (!firstSyncDone) {
@@ -71,6 +79,8 @@ void FirebaseHandler::update() {
 }
 
 void FirebaseHandler::syncPZEM() {
+    if (!canUseFirebase()) return;
+
     const PZEMMetrics& m = pzem->getMetrics();
     FirebaseJson json;
     json.add("v", m.voltage); json.add("a", m.current); json.add("w", m.power);
@@ -79,6 +89,8 @@ void FirebaseHandler::syncPZEM() {
 }
 
 void FirebaseHandler::syncNotifyCheck() {
+    if (!canUseFirebase()) return;
+
     FirebaseJson json;
     json.add("active", macros->getNotifyCheck());
     json.add("acActive", macros->isAcActive());
@@ -87,6 +99,8 @@ void FirebaseHandler::syncNotifyCheck() {
 }
 
 void FirebaseHandler::syncRelays() {
+    if (!canUseFirebase()) return;
+
     FirebaseJsonArray arr;
     for (int i = 0; i < 6; i++) {
         FirebaseJson relay;
@@ -100,6 +114,8 @@ void FirebaseHandler::syncRelays() {
 }
 
 void FirebaseHandler::syncAC() {
+    if (!canUseFirebase()) return;
+
     const ACState& acs = climate->getState();
     const ACState& pre = climate->getPreset();
     FirebaseJson json;
@@ -122,6 +138,8 @@ void FirebaseHandler::syncAC() {
 }
 
 void FirebaseHandler::syncPC() {
+    if (!canUseFirebase()) return;
+
     FirebaseJson json;
     json.add("online", pc->isOnline());
     json.add("start", (double)pc->getStartTimer());
@@ -130,6 +148,8 @@ void FirebaseHandler::syncPC() {
 }
 
 void FirebaseHandler::syncHealth() {
+    if (!canUseFirebase()) return;
+
     const HealthState& h = health->getState();
     FirebaseJson json;
     json.add("temp", h.temperature);
@@ -146,6 +166,8 @@ void FirebaseHandler::syncHealth() {
 }
 
 void FirebaseHandler::syncEnergy() {
+    if (!canUseFirebase()) return;
+
     FirebaseJson json;
     FirebaseJsonArray tierArr;
     const float* tiers = energy->getTierPrices();
@@ -166,6 +188,8 @@ void FirebaseHandler::syncEnergy() {
 }
 
 void FirebaseHandler::syncState() {
+    if (!canUseFirebase()) return;
+
     syncPZEM();
     syncRelays();
     syncAC();
@@ -195,7 +219,9 @@ void FirebaseHandler::syncState() {
 }
 
 void FirebaseHandler::handleCommands() {
-    if (Firebase.ready() && Firebase.RTDB.getJSON(&fbdo, "/device/cmd")) {
+    if (!canUseFirebase()) return;
+
+    if (Firebase.RTDB.getJSON(&fbdo, "/device/cmd")) {
         if (fbdo.dataType() == "json" && fbdo.jsonString() != "null") {
             // First parse the JSON into a document to safely clear the buffer
             JsonDocument doc;
